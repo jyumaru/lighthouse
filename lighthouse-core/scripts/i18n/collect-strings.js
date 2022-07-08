@@ -22,6 +22,7 @@ import {pruneObsoleteLhlMessages} from './prune-obsolete-lhl-messages.js';
 import {countTranslatedMessages} from './count-translated.js';
 import {LH_ROOT} from '../../../root.js';
 import {resolveModulePath} from '../../../esm-utils.mjs';
+import {pathToFileURL} from 'url';
 
 // Match declarations of UIStrings, terminating in either a `};\n` (very likely to always be right)
 // or `}\n\n` (allowing semicolon to be optional, but insisting on a double newline so that an
@@ -37,7 +38,7 @@ const foldersWithStrings = [
   `${LH_ROOT}/report/renderer`,
   `${LH_ROOT}/treemap`,
   `${LH_ROOT}/flow-report`,
-  path.dirname(resolveModulePath('lighthouse-stack-packs')) + '/packs',
+  path.join(path.dirname(resolveModulePath('lighthouse-stack-packs')), 'packs'),
 ];
 
 const ignoredPathComponents = [
@@ -552,7 +553,7 @@ async function collectAllStringsInDir(dir) {
     if (!process.env.CI) console.log('Collecting from', relativeToRootPath);
 
     const content = fs.readFileSync(absolutePath, 'utf8');
-    const exportVars = await import(absolutePath);
+    const exportVars = await import(pathToFileURL(absolutePath).href);
     const regexMatch = content.match(UISTRINGS_REGEX);
     const exportedUIStrings = exportVars.UIStrings || exportVars.default?.UIStrings;
 
